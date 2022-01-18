@@ -30,4 +30,3 @@ var AppNavigator= createSwitchNavigator({
 })
 
 var AppContainer=createAppContainer(AppNavigator)
-
