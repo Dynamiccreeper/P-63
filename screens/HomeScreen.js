@@ -2,7 +2,7 @@ import * as React from 'react'
 import {Text, TouchableOpacity, StyleSheet, View, TextInput} from 'react-native'
 import {Header} from 'react-native-elements'
 import dictionary from "../database"
-
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 export default class HomeScreen extends React.Component {
     constructor(){
         super()
@@ -11,51 +11,34 @@ export default class HomeScreen extends React.Component {
             isSearchPressed: false,
             word:"",
             lexicalCategory:'',
-            examples:[],
-            definition:""
+            definition:'',
         }
     }
 
-    getWord=(word)=>{
-        var searchKeyWord=word.toLowerCase();
-        var url="https://api.dictionaryapi.dev/api/v2/entries/en_US/"+searchKeyWord;
-        console.log(url)
-        return fetch(url)
-        .then((data)=>{
-          console.log(data.status)
-            if(data.status===200){
-                return data.json()
-            }
-            else{
-                return null;
-            }
-        })
-        .then ((response)=>{
-            var responseObject=response[0]
-            
-            if(responseObject){
-                var word= dictionary[text]["word"]
- 
-                var definition= dictionary[text]["definition"]
-                
-                var lexicalCategory= dictionary[text]["lexicalCategory"]
-                console.log(lexicalCategory)
-                this.setState({
-                    "word":word,
-                    "definition": definition,
-                    "lexicalCategory": lexicalCategory
-                })
-            } else{
-                this.setState({
-                    "word":this.state.text,
-                    "definition": "Not Found",
-                })
-            }
-        })
+    getWord=(text)=>{
+var text=text.toLowerCase()
+try{
+  var word=dictionary[text]["word"]
+  var lexicalCategory = dictionary[text]["lexicalCategory"]
+  var definition=dictionary[text]["difinition"]
+  this.setState({
+    "word":word,
+    "lexicalCategory":lexicalCategory,
+    "definition":definition
+  })
+}
+catch(err){
+  alert("Sorry this word is not avaivale for now")
+  this.setState({
+    "text":'',
+    'isSearchPressed':false
+  })
+}
     }
 
     render(){
         return(
+        <SafeAreaProvider style={{ flex: 1, backgroundColor: '#F0F8FF' }}>
             <View style={styles.container}>
             <Header centerComponent={{text: 'P-Dictionary', style:{color: 'black', fontWeight:'bold', fontSize:20,color:'black'} }}
               containerStyle={{backgroundColor:"white"}}/>
@@ -64,10 +47,10 @@ export default class HomeScreen extends React.Component {
                         this.setState({ 
                             text: text,
                             isSearchPressed: false,
-                            word:"Loading...",
+                            word:'loading...',
                             lexicalCategory:'',
-                            examples:[],
-                            definition:""})
+                            definition:''
+                            })
                     }}
 
                     value={this.state.text}
@@ -77,7 +60,7 @@ export default class HomeScreen extends React.Component {
                     onPress={()=>{
                         this.setState({isSearchPressed: true});
                         this.getWord(this.state.text);}}>
-                    <Text style={{textAlign:'center',fontWeight:'bold', padding: 10}}>Search</Text>
+          <Text style={{textAlign:'center',fontWeight:'bold', padding: 10}}>Search</Text>
                 </TouchableOpacity>
                 <View style={styles.dcontainer}>
                   <Text style={styles.detailsTitle}>
@@ -90,21 +73,19 @@ export default class HomeScreen extends React.Component {
                         Type: {""} 
                     </Text>
                     <Text style={{fontSize: 15,textAlign:'center',color:'white' }}>
-                        {this.state.lexicalCategory}
+                        {this.state.lexicalCategory}{'\n'}
                     </Text>
-                   
-                     <View style={{flexDirection:'row', flexWrap:'wrap', justifyContent:'left'}}>
                     <Text style={styles.detailsTitle}>
                         Definition: {""}
                     </Text >
-                    <Text style={{fontSize: 15,color:'white', marginLeft:10}}>
-                        {'\n'}{this.state.definition}
+                    <Text style={{fontSize: 15,textAlign:'center',color:'white' }}>
+                        {this.state.definition}{'\n'}
                     </Text>
-                </View>
                 </View>
                
                
             </View>
+          </SafeAreaProvider>
         )
     }
 }
